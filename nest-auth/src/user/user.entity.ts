@@ -3,21 +3,21 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 @Entity()
 export class User {
 	@PrimaryGeneratedColumn()
-	id: number
+	id: number;
 
 	@Column()
-	first_name: string
+	first_name: string;
 
 	@Column()
-	last_name: string
+	last_name: string;
 
 	@Column(
 		{
 			unique: true
 		}
 	)
-	email: string
+	email: string;
 
 	@Column()
-	password: string
+	password: string;
 }

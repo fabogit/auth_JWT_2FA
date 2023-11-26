@@ -9,7 +9,11 @@ export class UserService {
 	constructor(@InjectRepository(User) protected readonly userRepository: Repository<User>) { }
 
 	// TODO body type
-	async save(body) {
+	async save(body: any) {
 		return this.userRepository.save(body, {});
+	}
+
+	async findOne(email: string) {
+		return this.userRepository.findOne({ where: { email } });
 	}
 }

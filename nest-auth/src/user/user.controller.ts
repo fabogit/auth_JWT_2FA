@@ -81,7 +81,7 @@ export class UserController {
 	}
 
 	/**
-	 * Return the current logged in user using the jwt in the headers
+	 * Verify the access token in the request headers and return the current logged in user
 	 * @param request
 	 * @returns
 	 */
@@ -100,6 +100,12 @@ export class UserController {
 		}
 	}
 
+	/**
+	 * Verify the refresh token in the cookies is valid and sign a new jwt access token
+	 * @param request
+	 * @param response
+	 * @returns
+	 */
 	@Post('refresh')
 	async refreshToken(
 		@Request() request: Req,
@@ -112,10 +118,23 @@ export class UserController {
 				{ id },
 				{ expiresIn: '30s' },
 			);
-			response.status(200)
+			response.status(200);
 			return { token: newToken };
 		} catch (error) {
 			throw new UnauthorizedException();
 		}
+	}
+
+	/**
+	 * Remove the refresh token from the cookies
+	 * @param response
+	 * @returns
+	 */
+	@Post('logout')
+	async logout(@Response({ passthrough: true }) response: Res) {
+		response.clearCookie('refresh_token');
+		return {
+			message: 'Logged out',
+		};
 	}
 }

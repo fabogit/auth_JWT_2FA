@@ -11,11 +11,9 @@ export class User {
 	@Column()
 	last_name: string;
 
-	@Column(
-		{
-			unique: true
-		}
-	)
+	@Column({
+		unique: true,
+	})
 	email: string;
 
 	@Column()

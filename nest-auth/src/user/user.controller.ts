@@ -11,13 +11,13 @@ import {
 	Delete,
 } from '@nestjs/common';
 
-import { hash, compare } from 'bcrypt';
-import { MoreThanOrEqual } from 'typeorm';
-import { Request as Req, Response as Res } from 'express';
-
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from './services/user.service';
 import { TokenService } from './services/token.service';
+
+import { hash, compare } from 'bcrypt';
+import { MoreThanOrEqual } from 'typeorm';
+import { Request as Req, Response as Res } from 'express';
 
 @Controller()
 export class UserController {
@@ -28,9 +28,16 @@ export class UserController {
 	) { }
 
 	/**
-	 * Create a new user in the db
-	 * @param body
-	 * @returns
+	 * Register a new user with the provided details.
+	 *
+	 * @param body The request body containing user registration details.
+	 * @param body.first_name The first name of the user to be registered.
+	 * @param body.last_name The last name of the user to be registered.
+	 * @param body.email The email address of the user to be registered.
+	 * @param body.password The password chosen by the user for registration.
+	 * @param body.password_confirm Confirmation of the password chosen by the user.
+	 * @returns  A promise resolving to the saved user object upon successful registration.
+	 * @throws If the provided passwords do not match.
 	 */
 	@Post('register')
 	async register(@Body() body: any) {
@@ -46,11 +53,14 @@ export class UserController {
 	}
 
 	/**
-	 * Sign acces and refresh jwt, save the refresh token in the db.
-	 * Return the access token in the body response and set the a refresh_token cookie
-	 * @param email user email
-	 * @param password user password
-	 * @param response Body response
+	 * Authenticate a user by their email and password and generate access and refresh tokens.
+	 *
+	 * @param email The email address of the user attempting to log in.
+	 * @param password The password provided by the user for authentication.
+	 * @param response The response object to set the refresh token cookie and status.
+	 * @returns A promise resolving to an object containing the access token for the authenticated user.
+	 * @throws If the user with the provided email is not found.
+	 * @throws If the provided password does not match the user's password.
 	 */
 	@Post('login')
 	async login(
@@ -97,9 +107,11 @@ export class UserController {
 	}
 
 	/**
-	 * Verify the access token in the request headers and return the current logged in user
-	 * @param request
-	 * @returns
+	 * Verify the access token in the request headers and return the current logged in user.
+	 *
+	 * @param request - The request object containing headers for authentication.
+	 * @returns A promise resolving to an object containing details of the authenticated user.
+	 * @throws If the request is unauthorized or authentication fails.
 	 */
 	@Get('user')
 	async currentUser(@Request() request: Req) {
@@ -117,11 +129,12 @@ export class UserController {
 	}
 
 	/**
-	 * Verify the refresh token in the cookies is valid,
-	 * check in the db if is not expired and sign a new jwt access token
-	 * @param request
-	 * @param response
-	 * @returns
+	 * Refresh the access token using the provided refresh token.
+	 *
+	 * @param request - The request object containing the refresh token cookie.
+	 * @param response - The response object to set the new access token.
+	 * @returns A promise resolving to an object containing the new access token.
+	 * @throws If the refresh token is invalid or expired.
 	 */
 	@Post('refresh')
 	async refreshToken(
@@ -155,9 +168,12 @@ export class UserController {
 	}
 
 	/**
-	 * Remove the refresh_token cookie and revoke all user refresh tokens
-	 * @param response
-	 * @returns
+	 * Log out the currently authenticated user by deleting their refresh tokens.
+	 *
+	 * @param request - The request object containing the refresh token cookie.
+	 * @param response - The response object to clear the refresh token cookie and set status.
+	 * @returns An object with a success message indicating successful logout.
+	 * @throws If the request is unauthorized or authentication fails.
 	 */
 	@Delete('logout')
 	async logout(

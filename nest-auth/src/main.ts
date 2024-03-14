@@ -12,9 +12,9 @@ async function bootstrap() {
 			'http://localhost:8080',
 			'http://localhost:4200',
 		],
-		credentials: true
+		credentials: true,
 	});
-	app.use(cookieParser())
+	app.use(cookieParser());
 	await app.listen(8000);
 }
 bootstrap();

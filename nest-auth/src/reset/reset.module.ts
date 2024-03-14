@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { UserModule } from 'src/user/user.module';
 
 import { Reset } from './entities/reset.entity';
 import { ResetController } from './reset.controller';
@@ -19,6 +20,7 @@ import { ResetService } from './services/reset.service';
         from: 'from@example.com',
       },
     }),
+    UserModule
   ],
   providers: [ResetService],
   controllers: [ResetController],

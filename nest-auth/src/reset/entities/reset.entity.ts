@@ -9,7 +9,7 @@ export class Reset {
 	email: string;
 
 	@Column({
-		unique: true
+		unique: true,
 	})
 	token: string;
 }

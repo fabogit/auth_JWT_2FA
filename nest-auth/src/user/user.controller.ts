@@ -23,7 +23,6 @@ export class UserController {
 		private jwtService: JwtService,
 	) { }
 
-
 	/**
 	 * Create a new user in the db
 	 * @param body
@@ -70,7 +69,7 @@ export class UserController {
 		);
 		const refreshToken = await this.jwtService.signAsync({ id: user.id });
 
-		response.cookie('refreshToken', refreshToken, {
+		response.cookie('refresh_token', refreshToken, {
 			// helps mitigate the risk of client-side scripts accessing the protected cookie
 			// cookie cannot be accessed through the client-side script
 			httpOnly: true,
@@ -96,6 +95,25 @@ export class UserController {
 				where: { id },
 			});
 			return currentUser;
+		} catch (error) {
+			throw new UnauthorizedException();
+		}
+	}
+
+	@Post('refresh')
+	async refreshToken(
+		@Request() request: Req,
+		@Response({ passthrough: true }) response: Res,
+	) {
+		try {
+			const refreshToken = request.cookies['refresh_token'];
+			const { id } = await this.jwtService.verifyAsync(refreshToken);
+			const newToken = await this.jwtService.signAsync(
+				{ id },
+				{ expiresIn: '30s' },
+			);
+			response.status(200)
+			return { token: newToken };
 		} catch (error) {
 			throw new UnauthorizedException();
 		}

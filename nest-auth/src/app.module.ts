@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import * as cookieParser from 'cookie-parser';
+
 import { UserModule } from './user/user.module';
 
 @Module({

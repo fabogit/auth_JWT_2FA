@@ -8,19 +8,23 @@ import {
 	Post,
 	Get,
 	UnauthorizedException,
+	Delete,
 } from '@nestjs/common';
-// import * as bcrypt from "bcrypt";
+
 import { hash, compare } from 'bcrypt';
+import { MoreThanOrEqual } from 'typeorm';
 import { Request as Req, Response as Res } from 'express';
 
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from './user.service';
+import { UserService } from './services/user.service';
+import { TokenService } from './services/token.service';
 
 @Controller()
 export class UserController {
 	constructor(
-		private userService: UserService,
 		private jwtService: JwtService,
+		private userService: UserService,
+		private tokenService: TokenService,
 	) { }
 
 	/**
@@ -42,7 +46,8 @@ export class UserController {
 	}
 
 	/**
-	 * Log the user in and returns a jwt access token in the body response and a refresh token via cookies
+	 * Sign acces and refresh jwt, save the refresh token in the db.
+	 * Return the access token in the body response and set the a refresh_token cookie
 	 * @param email user email
 	 * @param password user password
 	 * @param response Body response
@@ -63,12 +68,23 @@ export class UserController {
 			throw new BadRequestException('Invalid credentials');
 		}
 
+		// Sign jwt for the user
 		const accessToken = await this.jwtService.signAsync(
 			{ id: user.id },
 			{ expiresIn: '30s' },
 		);
 		const refreshToken = await this.jwtService.signAsync({ id: user.id });
 
+		// Save the refresh token in the db and set expiration to 1week
+		const oneWeek = new Date();
+		oneWeek.setDate(oneWeek.getDate() + 7);
+		await this.tokenService.save({
+			user_id: user.id,
+			refresh_token: refreshToken,
+			expired_at: oneWeek,
+		});
+
+		// Set refresh_token cookie and retun access token
 		response.cookie('refresh_token', refreshToken, {
 			// helps mitigate the risk of client-side scripts accessing the protected cookie
 			// cookie cannot be accessed through the client-side script
@@ -101,7 +117,8 @@ export class UserController {
 	}
 
 	/**
-	 * Verify the refresh token in the cookies is valid and sign a new jwt access token
+	 * Verify the refresh token in the cookies is valid,
+	 * check in the db if is not expired and sign a new jwt access token
 	 * @param request
 	 * @param response
 	 * @returns
@@ -114,6 +131,18 @@ export class UserController {
 		try {
 			const refreshToken = request.cookies['refresh_token'];
 			const { id } = await this.jwtService.verifyAsync(refreshToken);
+
+			const oldRefreshToken = await this.tokenService.findOne({
+				where: {
+					user_id: id,
+					expired_at: MoreThanOrEqual(new Date()),
+				},
+			});
+
+			if (!oldRefreshToken) {
+				throw new UnauthorizedException();
+			}
+
 			const newToken = await this.jwtService.signAsync(
 				{ id },
 				{ expiresIn: '30s' },
@@ -126,15 +155,26 @@ export class UserController {
 	}
 
 	/**
-	 * Remove the refresh token from the cookies
+	 * Remove the refresh_token cookie and revoke all user refresh tokens
 	 * @param response
 	 * @returns
 	 */
-	@Post('logout')
-	async logout(@Response({ passthrough: true }) response: Res) {
-		response.clearCookie('refresh_token');
-		return {
-			message: 'Logged out',
-		};
+	@Delete('logout')
+	async logout(
+		@Request() request: Req,
+		@Response({ passthrough: true }) response: Res,
+	) {
+		try {
+			const refreshToken = request.cookies['refresh_token'];
+			const { id } = await this.jwtService.verifyAsync(refreshToken);
+			await this.tokenService.delete({ user_id: id });
+			response.clearCookie('refresh_token');
+			response.status(202);
+			return {
+				message: 'Logged out',
+			};
+		} catch (error) {
+			throw new UnauthorizedException();
+		}
 	}
 }

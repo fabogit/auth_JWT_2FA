@@ -1,14 +1,16 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
-import { User } from './user.entity';
-import { UserController } from './user.controller';
-import { UserService } from './user.service';
 import { JwtModule } from '@nestjs/jwt';
+
+import { User } from './entities/user.entity';
+import { Token } from './entities/token.entity';
+import { UserController } from './user.controller';
+import { UserService } from './services/user.service';
+import { TokenService } from './services/token.service';
 
 @Module({
 	imports: [
-		TypeOrmModule.forFeature([User]),
+		TypeOrmModule.forFeature([User, Token]),
 		JwtModule.register({
 			// global: true,
 			secret: 'jwtConstants.secret',
@@ -19,6 +21,6 @@ import { JwtModule } from '@nestjs/jwt';
 		}),
 	],
 	controllers: [UserController],
-	providers: [UserService]
+	providers: [UserService, TokenService]
 })
 export class UserModule { }

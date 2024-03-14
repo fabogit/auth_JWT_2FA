@@ -1,14 +1,17 @@
 import {
 	BadRequestException,
 	Body,
+	Request,
 	Response,
 	Controller,
 	NotFoundException,
 	Post,
+	Get,
+	UnauthorizedException,
 } from '@nestjs/common';
 // import * as bcrypt from "bcrypt";
 import { hash, compare } from 'bcrypt';
-import { Response as Res } from 'express';
+import { Request as Req, Response as Res } from 'express';
 
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user.service';
@@ -20,7 +23,12 @@ export class UserController {
 		private jwtService: JwtService,
 	) { }
 
-	// TODO type body
+
+	/**
+	 * Create a new user in the db
+	 * @param body
+	 * @returns
+	 */
 	@Post('register')
 	async register(@Body() body: any) {
 		if (body.password !== body.password_confirm) {
@@ -34,13 +42,19 @@ export class UserController {
 		});
 	}
 
+	/**
+	 * Log the user in and returns a jwt access token in the body response and a refresh token via cookies
+	 * @param email user email
+	 * @param password user password
+	 * @param response Body response
+	 */
 	@Post('login')
 	async login(
 		@Body('email') email: string,
 		@Body('password') password: string,
 		@Response({ passthrough: true }) response: Res,
 	) {
-		const user = await this.userService.findOne(email);
+		const user = await this.userService.findOne({ where: { email } });
 		if (!user) {
 			throw new NotFoundException('User not found');
 		}
@@ -63,8 +77,27 @@ export class UserController {
 			//  1week
 			maxAge: 7 * 24 * 60 * 60 * 1000,
 		});
-		response.status(200)
-
+		response.status(200);
 		return { token: accessToken };
+	}
+
+	/**
+	 * Return the current logged in user using the jwt in the headers
+	 * @param request
+	 * @returns
+	 */
+	@Get('user')
+	async currentUser(@Request() request: Req) {
+		try {
+			// get access token from headers and verify the jwt
+			const accessToken = request.headers.authorization.replace('Bearer ', '');
+			const { id } = await this.jwtService.verifyAsync(accessToken);
+			const { password, ...currentUser } = await this.userService.findOne({
+				where: { id },
+			});
+			return currentUser;
+		} catch (error) {
+			throw new UnauthorizedException();
+		}
 	}
 }

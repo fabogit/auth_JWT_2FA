@@ -13,7 +13,7 @@ export class UserService {
 		return this.userRepository.save(body, {});
 	}
 
-	async findOne(email: string) {
-		return this.userRepository.findOne({ where: { email } });
+	async findOne(options: any) {
+		return this.userRepository.findOne(options);
 	}
 }

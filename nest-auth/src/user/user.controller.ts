@@ -13,7 +13,7 @@ import { Response as Res } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user.service';
 
-@Controller('api')
+@Controller()
 export class UserController {
 	constructor(
 		private userService: UserService,
@@ -63,6 +63,7 @@ export class UserController {
 			//  1week
 			maxAge: 7 * 24 * 60 * 60 * 1000,
 		});
+		response.status(200)
 
 		return { token: accessToken };
 	}

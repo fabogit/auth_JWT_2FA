@@ -1,13 +1,24 @@
 <script>
+  import Router, { link } from "svelte-spa-router";
+  import axios from "axios";
+  import { isAuthenticated } from "./store/auth";
   import Home from "./pages/Home.svelte";
   import Login from "./pages/Login.svelte";
   import Register from "./pages/Register.svelte";
-  import Router, { link } from "svelte-spa-router";
 
   const routes = {
     "/": Home,
     "/login": Login,
     "/register": Register,
+  };
+
+  let isAuth = false;
+  isAuthenticated.subscribe((value) => (isAuth = value));
+
+  $: logout = async () => {
+    await axios.delete("logout", {}, { withCredentials: true });
+    isAuthenticated.set(false);
+    axios.defaults.headers.common.Authorization = "";
   };
 </script>
 
@@ -24,12 +35,24 @@
         </li>
       </ul>
 
-      <div class="text-end">
-        <a href="/login" use:link class="btn btn-outline-light me-2">Login</a>
-        <a href="/register" use:link class="btn btn-outline-light me-2"
-          >Register</a
-        >
-      </div>
+      {#if isAuth}
+        <div class="text-end">
+          <a
+            on:click={logout}
+            href="/login"
+            use:link
+            class="btn btn-outline-light me-2">Logout</a
+          >
+        </div>
+      {:else}
+        <div class="text-end">
+          <a href="/login" use:link class="btn btn-outline-light me-2">Login</a>
+
+          <a href="/register" use:link class="btn btn-outline-light me-2"
+            >Register</a
+          >
+        </div>
+      {/if}
     </div>
   </div>
 </header>

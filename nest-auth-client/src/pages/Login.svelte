@@ -1,13 +1,14 @@
 <script>
   import axios from "axios";
   import { push } from "svelte-spa-router";
+  import { isAuthenticated } from "../store/auth";
 
   let email = "";
   let password = "";
 
   $: submit = async () => {
     const response = await axios.post(
-      "http://localhost:8000/api/login",
+      "login",
       {
         email,
         password,
@@ -16,10 +17,9 @@
       { withCredentials: true }
     );
 
-    const token = response.data.token;
-
-    // set access token
-    axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+    // set access token and store status
+    axios.defaults.headers.common.Authorization = `Bearer ${response.data.token}`;
+    isAuthenticated.set(true);
 
     await push("/");
   };

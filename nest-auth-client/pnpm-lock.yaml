@@ -33,6 +33,9 @@ importers:
       '@tsconfig/svelte':
         specifier: ^3.0.0
         version: 3.0.0
+      '@types/axios':
+        specifier: ^0.14.4
+        version: 0.14.4
       rollup:
         specifier: ^3.15.0
         version: 3.29.5
@@ -142,6 +145,10 @@ packages:
 
   '@tsconfig/svelte@3.0.0':
     resolution: {integrity: sha512-pYrtLtOwku/7r1i9AMONsJMVYAtk3hzOfiGNekhtq5tYBGA7unMve8RvUclKLMT3PrihvJqUmzsRGh0RP84hKg==}
+
+  '@types/axios@0.14.4':
+    resolution: {integrity: sha512-9JgOaunvQdsQ/qW2OPmE5+hCeUB52lQSolecrFrthct55QekhmXEwT203s20RL+UHtCQc15y3VXpby9E7Kkh/g==}
+    deprecated: This is a stub types definition. axios provides its own type definitions, so you do not need this installed.
 
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
@@ -671,6 +678,12 @@ snapshots:
       rollup: 3.29.5
 
   '@tsconfig/svelte@3.0.0': {}
+
+  '@types/axios@0.14.4':
+    dependencies:
+      axios: 1.7.9
+    transitivePeerDependencies:
+      - debug
 
   '@types/estree@1.0.6': {}
 

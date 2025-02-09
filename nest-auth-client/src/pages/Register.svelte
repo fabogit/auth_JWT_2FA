@@ -9,7 +9,7 @@
   let password_confirm = "";
 
   $: submit = async () => {
-    await axios.post("http://localhost:8000/api/register", {
+    await axios.post("register", {
       first_name,
       last_name,
       email,

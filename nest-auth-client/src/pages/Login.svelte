@@ -1,6 +1,6 @@
 <script>
   import axios from "axios";
-  import { push } from "svelte-spa-router";
+  import { link, push } from "svelte-spa-router";
   import { isAuthenticated } from "../store/auth";
 
   let email = "";
@@ -49,6 +49,10 @@
         placeholder="Password"
       />
       <label for="password">Password</label>
+    </div>
+
+    <div class="mb-3">
+      <a href="/forgot" use:link>Forgot password?</a>
     </div>
 
     <button class="btn btn-primary w-100 py-2" type="submit">Submit</button>

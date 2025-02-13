@@ -1,6 +1,6 @@
-# Auth JWT & 2FA
+# Auth & 2FA
 
-JWT Auth flow
+Auth flow using access and refresh token, 2fa on the `2fa` branch
 
 `nvm use`
 
